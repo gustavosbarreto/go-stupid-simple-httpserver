@@ -1,0 +1,15 @@
+routes:
+  - path: "/books"
+    method: GET
+    exec: |
+      cat /tmp/books
+  - path: "/books/:id"
+    method: GET
+    exec: |
+      cat /tmp/books | grep "^$PARAM_ID," | cut -d',' -f2
+  - path: "/books"
+    method: POST
+    exec: |
+      ID=$(echo $(expr $((cat /tmp/books || echo 0) | tail -1 | cut -d',' -f1) + 1))
+      NAME=$(cat -)
+      echo "$ID,$NAME" >> /tmp/books
