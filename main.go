@@ -111,5 +111,7 @@ func main() {
 		}
 	}
 
-	e.Start(":8088")
+	if err = e.Start(":8088"); err != nil {
+		panic(err)
+	}
 }
