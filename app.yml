@@ -15,3 +15,10 @@ routes:
       ID=$(echo $(expr $((cat /tmp/books || echo 0) | tail -1 | cut -d',' -f1) + 1))
       NAME=$(cat -)
       echo "$ID,$NAME" >> /tmp/books
+  - path: "/books/:id"
+    method: DELETE
+    exec: |
+      BOOK=$(cat /tmp/books | grep "^$PARAM_ID," | cut -d',' -f2)
+      [ -z "$BOOK" ] && echo 404 && exit 1
+      sed -i -e "s,^${PARAM_ID}\,.*,,g" /tmp/books
+      sed -i -e '/^\s*$/d' /tmp/books
