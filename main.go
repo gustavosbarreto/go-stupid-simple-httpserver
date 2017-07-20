@@ -30,6 +30,10 @@ func handler(route Route) func(echo.Context) error {
       cmd.Env = append(cmd.Env, fmt.Sprintf("PARAM_%s=%s", strings.ToUpper(name), c.Param(name)))
     }
 
+    for key, value := range c.Request().Header {
+      cmd.Env = append(cmd.Env, fmt.Sprintf("HEADER_%s=%s", strings.ToUpper(key), value))
+    }
+
     stdin, err := cmd.StdinPipe()
     if err != nil {
       return err
@@ -41,7 +45,7 @@ func handler(route Route) func(echo.Context) error {
     if err != nil {
       return err
     }
-    
+
     defer stdout.Close()
 
     err = cmd.Start()
