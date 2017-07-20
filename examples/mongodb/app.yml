@@ -1,0 +1,26 @@
+routes:
+  - path: "/books"
+    method: GET
+    exec: |
+      mongo --quiet --eval "db.books.find().toArray()"
+  - path: "/books/:id"
+    method: GET
+    exec: |
+      mongo --quiet --eval "db.books.find(ObjectId(\"$PARAM_ID\"))"
+  - path: "/books"
+    exec: |
+    method: POST
+    exec: |
+      mongo --quiet --eval "db.books.insertOne({ \"name\": \"$(cat -)\" })"
+  - path: "/books/:id"
+    method: PUT
+    exec: |
+      BOOK=$(mongo --quiet --eval "db.books.findOne(ObjectId(\"${PARAM_ID}\"))")
+      ([ $? -ne 0 ] || [ "$BOOK" = "null" ]) && echo 404 && exit 1
+      mongo --quiet --eval "db.books.update({ \"_id\": ObjectId(\"${PARAM_ID}\") }, { \"name\": \"$(cat -)\" })"
+  - path: "/books/:id"
+    method: DELETE
+    exec: |
+      BOOK=$(mongo --quiet --eval "db.books.findOne(ObjectId(\"${PARAM_ID}\"))")
+      ([ $? -ne 0 ] || [ "$BOOK" = "null" ]) && echo 404 && exit 1
+      mongo --quiet --eval "db.books.remove({ \"_id\": ObjectId(\"${PARAM_ID}\") })"
