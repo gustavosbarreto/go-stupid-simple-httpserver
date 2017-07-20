@@ -16,6 +16,12 @@ routes:
       NAME=$(cat -)
       echo "$ID,$NAME" >> /tmp/books
   - path: "/books/:id"
+    method: PUT
+    exec: |
+      BOOK=$(cat /tmp/books | grep "^$PARAM_ID," | cut -d',' -f2)
+      [ -z "$BOOK" ] && echo 404 && exit 1
+      sed -i -e "s,^${PARAM_ID}\,.*,${PARAM_ID}\,$(cat -),g" /tmp/books
+  - path: "/books/:id"
     method: DELETE
     exec: |
       BOOK=$(cat /tmp/books | grep "^$PARAM_ID," | cut -d',' -f2)

@@ -110,6 +110,8 @@ func main() {
 			e.GET(route.Path, handler(route))
 		case "POST":
 			e.POST(route.Path, handler(route))
+		case "PUT":
+			e.PUT(route.Path, handler(route))
 		case "DELETE":
 			e.DELETE(route.Path, handler(route))
 		}
