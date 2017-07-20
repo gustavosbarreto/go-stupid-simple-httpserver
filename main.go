@@ -10,6 +10,7 @@ import "github.com/labstack/echo"
 import yaml "gopkg.in/yaml.v2"
 
 type Application struct {
+	Listen string  `yaml:"listen,omitempty"`
 	Routes []Route `yaml:"routes,omitempty"`
 }
 
@@ -86,7 +87,10 @@ func main() {
 		panic(err)
 	}
 
-	app := Application{}
+	app := Application{
+		Listen: ":8080",
+	}
+
 	if err := yaml.Unmarshal(data, &app); err != nil {
 		panic(err)
 	}
@@ -111,7 +115,7 @@ func main() {
 		}
 	}
 
-	if err = e.Start(":8088"); err != nil {
+	if err = e.Start(app.Listen); err != nil {
 		panic(err)
 	}
 }
