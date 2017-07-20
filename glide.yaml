@@ -1,0 +1,5 @@
+package: .
+import:
+- package: github.com/labstack/echo
+  version: ^3.2.1
+- package: gopkg.in/yaml.v2
