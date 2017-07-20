@@ -1,13 +1,17 @@
 package main
 
-import "fmt"
-import "strings"
-import "net/http"
-import "io/ioutil"
-import "os/exec"
-import "strconv"
-import "github.com/labstack/echo"
-import yaml "gopkg.in/yaml.v2"
+import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os/exec"
+	"strconv"
+	"strings"
+
+	"github.com/labstack/echo"
+
+	yaml "gopkg.in/yaml.v2"
+)
 
 type Application struct {
 	Listen string  `yaml:"listen,omitempty"`
@@ -30,6 +34,10 @@ func handler(route Route) func(echo.Context) error {
 
 		for _, name := range c.ParamNames() {
 			cmd.Env = append(cmd.Env, fmt.Sprintf("PARAM_%s=%s", strings.ToUpper(name), c.Param(name)))
+		}
+
+		for name, values := range c.QueryParams() {
+			cmd.Env = append(cmd.Env, fmt.Sprintf("QUERY_%s=%s", strings.ToUpper(name), values[0]))
 		}
 
 		for key, value := range c.Request().Header {
