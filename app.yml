@@ -6,7 +6,9 @@ routes:
   - path: "/books/:id"
     method: GET
     exec: |
-      cat /tmp/books | grep "^$PARAM_ID," | cut -d',' -f2
+      BOOK=$(cat /tmp/books | grep "^$PARAM_ID," | cut -d',' -f2)
+      [ -z "$BOOK" ] && echo 404 && exit 1
+      echo $BOOK
   - path: "/books"
     method: POST
     exec: |

@@ -5,6 +5,7 @@ import "strings"
 import "net/http"
 import "io/ioutil"
 import "os/exec"
+import "strconv"
 import "github.com/labstack/echo"
 import yaml "gopkg.in/yaml.v2"
 
@@ -67,6 +68,11 @@ func handler(route Route) func(echo.Context) error {
     }
 
     if err = cmd.Wait(); err != nil {
+      httpCode, err := strconv.Atoi(strings.TrimSpace(string(output)))
+      if err == nil {
+        return c.NoContent(httpCode)
+      }
+
       return c.NoContent(http.StatusInternalServerError)
     }
 
