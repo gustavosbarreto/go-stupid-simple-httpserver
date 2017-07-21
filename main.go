@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 
@@ -21,6 +24,7 @@ type Application struct {
 type Route struct {
 	Path   string `yaml:"path,omitempty"`
 	Method string `yaml:"method,omitempty"`
+	Upload string `yaml:"upload,omitempty"`
 	Exec   string `yaml:"exec,omitempty"`
 }
 
@@ -42,6 +46,40 @@ func handler(route Route) func(echo.Context) error {
 
 		for key, value := range c.Request().Header {
 			cmd.Env = append(cmd.Env, fmt.Sprintf("HEADER_%s=%s", strings.ToUpper(key), value))
+		}
+
+		if route.Upload != "" {
+			upload, err := c.FormFile(route.Upload)
+			if err != nil {
+				return c.NoContent(http.StatusInternalServerError)
+			}
+
+			src, err := upload.Open()
+			if err != nil {
+				return c.NoContent(http.StatusInternalServerError)
+			}
+			defer src.Close()
+
+			if err = os.MkdirAll("uploads", 0700); err != nil {
+				return c.NoContent(http.StatusInternalServerError)
+			}
+
+			dst, err := os.Create(path.Join("uploads", upload.Filename))
+			if err != nil {
+				fmt.Println(err)
+				return c.NoContent(http.StatusInternalServerError)
+			}
+			defer dst.Close()
+
+			defer func() {
+				os.Remove(dst.Name())
+			}()
+
+			if _, err = io.Copy(dst, src); err != nil {
+				return c.NoContent(http.StatusInternalServerError)
+			}
+
+			cmd.Env = append(cmd.Env, fmt.Sprintf("UPLOAD_%s=%s", strings.ToUpper(route.Upload), upload.Filename))
 		}
 
 		stdin, err := cmd.StdinPipe()
@@ -96,7 +134,7 @@ func main() {
 	}
 
 	app := Application{
-		Listen: ":8080",
+		Listen: ":8088",
 	}
 
 	if err := yaml.Unmarshal(data, &app); err != nil {

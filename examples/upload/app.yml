@@ -1,0 +1,8 @@
+routes:
+  - path: "/upload"
+    method: POST
+    upload: file
+    exec: |
+      echo "Filename: $UPLOAD_FILE"
+      echo "File contents:"
+      cat uploads/${UPLOAD_FILE}
