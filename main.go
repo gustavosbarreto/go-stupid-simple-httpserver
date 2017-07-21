@@ -25,6 +25,8 @@ type Route struct {
 	Path   string `yaml:"path,omitempty"`
 	Method string `yaml:"method,omitempty"`
 	Upload string `yaml:"upload,omitempty"`
+	Static bool   `yaml:"static,omitempty"`
+	Root   string `yaml:"root,omitempty"`
 	Exec   string `yaml:"exec,omitempty"`
 }
 
@@ -160,6 +162,11 @@ func main() {
 			e.PUT(route.Path, handler(route))
 		case "DELETE":
 			e.DELETE(route.Path, handler(route))
+		}
+
+		if route.Static {
+			e.Static(route.Path, route.Root)
+			continue
 		}
 	}
 

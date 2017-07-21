@@ -1,0 +1,4 @@
+routes:
+  - path: "/"
+    static: true
+    root: "./"
