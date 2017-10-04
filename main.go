@@ -98,6 +98,15 @@ func handler(route Route) func(echo.Context) error {
 
 		defer stdout.Close()
 
+		hdir, err := ioutil.TempDir("", "headers")
+		if err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
+
+		defer os.RemoveAll(hdir)
+
+		cmd.Env = append(cmd.Env, fmt.Sprintf("HEADERS=%s", hdir))
+
 		err = cmd.Start()
 		if err != nil {
 			return c.NoContent(http.StatusInternalServerError)
@@ -123,6 +132,16 @@ func handler(route Route) func(echo.Context) error {
 			}
 
 			return c.NoContent(http.StatusInternalServerError)
+		}
+
+		headers, err := ioutil.ReadDir(hdir)
+		if err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
+
+		for _, f := range headers {
+			header, _ := ioutil.ReadFile(path.Join(hdir, f.Name()))
+			c.Response().Header().Set(f.Name(), string(header))
 		}
 
 		return c.String(http.StatusOK, string(output))
